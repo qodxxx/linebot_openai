@@ -75,7 +75,7 @@ def handle_follow(event):
     store_user_id(user_id)  # 儲存用户 ID
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text="感谢加入我们的 Bot!")
+        TextSendMessage(text="感謝加入我們的 Bot!")
     )
 
 # 處理其他事件
