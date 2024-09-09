@@ -1,25 +1,24 @@
 import sqlite3
-from flask import Flask, request, abort
+from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 
 app = Flask(__name__)
-line_bot_api = LineBotApi('你的CHANNEL_ACCESS_TOKEN')
-handler = WebhookHandler('你的CHANNEL_SECRET')
+line_bot_api = LineBotApi('YOUR_CHANNEL_ACCESS_TOKEN')
+handler = WebhookHandler('YOUR_CHANNEL_SECRET')
 
-# 创建用户表的函数
-def create_users_table():
+# 数据库设置
+def init_db():
     conn = sqlite3.connect('users.db')
     c = conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS users (user_id TEXT UNIQUE)')
     conn.commit()
     conn.close()
 
-# 在应用启动时确保表已创建
 @app.before_first_request
-def initialize():
-    create_users_table()
+def setup():
+    init_db()
 
 def store_user_id(user_id):
     conn = sqlite3.connect('users.db')
@@ -58,13 +57,13 @@ def handle_message(event):
     msg = event.message.text
     user_id = event.source.user_id
     store_user_id(user_id)
-    line_bot_api.reply_message(event.reply_token, TextSendMessage(text="已记录你的用户ID"))
+    # Your logic to handle incoming messages
 
 @app.route("/send_alert", methods=['POST'])
 def send_alert():
     alert_message = request.json.get('message', '默认警告消息')
     send_alert_to_all_users(alert_message)
-    return 'Alert sent!'
+    return jsonify({'status': 'Alert sent!'})
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
