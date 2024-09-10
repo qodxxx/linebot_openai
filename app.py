@@ -89,25 +89,24 @@ def handle_follow(event):
         TextSendMessage(text="感謝加入我們的 Bot!")
     )
 
+# 處理其他事件
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_message = event.message.text
+    msg = event.message.text.lower()  # 將消息轉為小寫以方便匹配
+    if '你好' in msg or 'hello' in msg:
+        response = "你好！有什麼我可以幫助你的嗎？"
+    elif '天氣' in msg or 'weather' in msg:
+        response = "今天的天氣不錯喔！"
+    elif '幫助' in msg or 'help' in msg:
+        response = "我在這裡隨時為你服務！你可以問我天氣，或者跟我打個招呼。"
+    else:
+        response = "抱歉，我不太明白你的意思。你可以試著說'你好'或'幫助'來跟我互動。"
 
-    # 使用 OpenAI API 生成回复
-    response = openai.Completion.create(
-        model="gpt-3.5-turbo",  # 或者使用 "gpt-4" 模型
-        messages=[{"role": "user", "content": user_message}],
-        max_tokens=150  # 可根据需求调整回复长度
-    )
-
-    # 从 OpenAI API 响应中获取生成的文本
-    reply_text = response['choices'][0]['message']['content']
-
-    # 使用 LINE API 回复消息
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=reply_text)
+        TextSendMessage(text=response)
     )
+
 
 # 新的端點，用於接收警告消息並發送給用戶
 @app.route("/send_alert", methods=['POST'])
