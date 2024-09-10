@@ -2,7 +2,6 @@ from flask import Flask, request, abort, jsonify
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
-
 import psycopg2
 import os
 
@@ -46,7 +45,7 @@ def get_all_user_ids():
     conn.close()
     return [user_id[0] for user_id in user_ids]
 
-# 發送警告給消息给所有用户
+# 發送警告給所有用戶
 def send_alert_to_all_users(alert_message):
     user_ids = get_all_user_ids()
     for user_id in user_ids:
@@ -54,6 +53,15 @@ def send_alert_to_all_users(alert_message):
             line_bot_api.push_message(user_id, TextSendMessage(text=alert_message))
         except Exception as e:
             print(f"Failed to send message to {user_id}: {e}")
+
+# 發送 Flex Message 給所有用戶
+def send_flex_to_all_users(flex_message):
+    user_ids = get_all_user_ids()
+    for user_id in user_ids:
+        try:
+            line_bot_api.push_message(user_id, flex_message)
+        except Exception as e:
+            print(f"Failed to send Flex message to {user_id}: {e}")
 
 # 監聽 /callback 的 POST 請求
 @app.route("/callback", methods=['POST'])
@@ -95,6 +103,24 @@ def send_alert():
     if alert_message:
         send_alert_to_all_users(alert_message)
         return jsonify({'status': 'success'}), 200
+    else:
+        return jsonify({'status': 'error', 'message': 'No message provided'}), 400
+
+# 新的端點，用於接收 Flex Message 並發送給用戶
+@app.route("/send_flex", methods=['POST'])
+def send_flex():
+    data = request.get_json()
+    message_data = data.get('message')  # 獲取 message 字段中的內容
+    if message_data:
+        try:
+            flex_message = FlexSendMessage(
+                alt_text=message_data['altText'],
+                contents=message_data['contents']
+            )
+            send_flex_to_all_users(flex_message)  # 發送 Flex Message 給所有用戶
+            return jsonify({'status': 'success'}), 200
+        except Exception as e:
+            return jsonify({'status': 'error', 'message': f'Failed to process message: {e}'}), 400
     else:
         return jsonify({'status': 'error', 'message': 'No message provided'}), 400
 
