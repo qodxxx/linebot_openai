@@ -10,6 +10,7 @@ app = Flask(__name__)
 # Channel Access Token 和 Secret
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler = WebhookHandler(os.getenv('CHANNEL_SECRET'))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 連接render資料庫
 def get_db_connection():
@@ -86,13 +87,24 @@ def handle_follow(event):
         TextSendMessage(text="感謝加入我們的 Bot!")
     )
 
-# 處理其他事件
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    msg = event.message.text
+    user_message = event.message.text
+
+    # 使用 OpenAI API 生成回复
+    response = openai.Completion.create(
+        model="gpt-3.5-turbo",  # 或者使用 "gpt-4" 模型
+        messages=[{"role": "user", "content": user_message}],
+        max_tokens=150  # 可根据需求调整回复长度
+    )
+
+    # 从 OpenAI API 响应中获取生成的文本
+    reply_text = response['choices'][0]['message']['content']
+
+    # 使用 LINE API 回复消息
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=f"你發送的消息是: {msg}")
+        TextSendMessage(text=reply_text)
     )
 
 # 新的端點，用於接收警告消息並發送給用戶
