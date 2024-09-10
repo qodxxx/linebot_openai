@@ -100,7 +100,7 @@ def handle_message(event):
     elif '幫助' in msg or 'help' in msg:
         response = "我在這裡隨時為你服務！你可以問我天氣，或者跟我打個招呼。"
     else:
-        response = "抱歉，我不太明白你的意思。你可以試著說'你好'或'幫助'來跟我互動。"
+        response = "抱歉，我不太明白你的意思。你可以試著說'你好'或'幫助'來跟我互動，或找Eric Wu處理。"
 
     line_bot_api.reply_message(
         event.reply_token,
