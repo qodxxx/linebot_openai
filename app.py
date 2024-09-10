@@ -4,6 +4,8 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import *
 import psycopg2
 import os
+import openai
+
 
 app = Flask(__name__)
 
