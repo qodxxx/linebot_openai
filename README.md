@@ -3,3 +3,5 @@
 English:
 A Flask-based LINE Bot server, adapted from a GPT-3 example project, that handles user messages, stores user IDs in a PostgreSQL database, and supports backend broadcasting of text or Flex Messages to all users. Deployable on Render or other cloud platforms.
 
+
+![Image](https://github.com/user-attachments/assets/6dddfb8d-df61-42bc-a258-0bdc81f344b0)
